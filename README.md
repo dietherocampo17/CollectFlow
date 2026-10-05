@@ -45,6 +45,8 @@ The server checks a database-backed session and role permission for every API ro
 
 The interaction-documentation helper creates a structured draft from collector notes and requires review before saving; it is a local template, not an external AI/LLM integration. Broken promises create durable follow-up tasks when promise data is refreshed. Outbound SMS/email notifications and scheduled background execution are not connected. Bulk CSV account import is also not implemented; accounts are currently entered individually.
 
+For the role-by-role navigation, permitted actions, workflow notes, and screenshots, see the [Role and Workflow Guide](docs/roles-and-workflows.md).
+
 ## Configure MySQL and the initial administrator
 
 Docker and Docker Compose are required for the supported deployment. Create a local environment file and set unique secrets before starting:
