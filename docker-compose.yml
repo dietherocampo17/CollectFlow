@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - collectflow_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  collectflow:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      COLLECTFLOW_ADMIN_USERNAME: ${COLLECTFLOW_ADMIN_USERNAME:?Set COLLECTFLOW_ADMIN_USERNAME in .env}
+      COLLECTFLOW_ADMIN_PASSWORD: ${COLLECTFLOW_ADMIN_PASSWORD:?Set COLLECTFLOW_ADMIN_PASSWORD in .env}
+      COLLECTFLOW_ADMIN_NAME: ${COLLECTFLOW_ADMIN_NAME:-System Administrator}
+      COLLECTFLOW_SEED_DEMO_DATA: ${COLLECTFLOW_SEED_DEMO_DATA:-false}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./collectflow.db:/migration/collectflow.db:ro
+
+volumes:
+  collectflow_mysql_data:

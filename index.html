@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CollectFlow Full-Stack Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section id="loginScreen" class="login-screen">
+      <form id="loginForm" class="login-card">
+        <div class="brand-mark">C</div>
+        <p class="eyebrow">CollectFlow Operations</p>
+        <h1>Sign in</h1>
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" name="username" autocomplete="username" required />
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+        <button type="submit">Sign in</button>
+        <p id="loginError" class="form-message" role="alert"></p>
+      </form>
+    </section>
+
+    <div class="app-shell" id="appShell" hidden>
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">C</span>
+          <div>
+            <h2>CollectFlow</h2>
+            <small>Operations Suite</small>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Main navigation">
+          <button type="button" class="nav-item active" data-view="dashboard">Dashboard</button>
+          <button type="button" class="nav-item" data-view="accounts">Accounts</button>
+          <button type="button" class="nav-item" data-view="promises">Promises</button>
+          <button type="button" class="nav-item" data-view="activities">Activity timeline</button>
+          <button type="button" class="nav-item" data-view="tasks">Follow-up tasks</button>
+          <button type="button" class="nav-item" data-view="reports">Reports</button>
+          <button type="button" class="nav-item" data-view="strategy">Strategy simulator</button>
+          <button type="button" class="nav-item" data-view="clients">Clients</button>
+          <button type="button" class="nav-item" data-view="users">User administration</button>
+          <button type="button" class="nav-item" data-view="audit">Audit log</button>
+        </nav>
+
+        <div class="sidebar-card">
+          <p class="label">Priority Queue</p>
+          <h3 id="queueSummary">0 accounts</h3>
+          <span class="status danger" id="queueStatus">Needs action</span>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <h1 id="pageTitle">CollectFlow Dashboard</h1>
+          </div>
+          <div class="user-panel">
+            <div class="user-badge">
+              <span>Logged in as</span>
+              <strong id="currentUser">System Administrator</strong>
+            </div>
+            <details class="password-menu">
+              <summary>Change password</summary>
+              <form id="passwordForm" class="password-form">
+                <label for="currentPassword">Current password</label>
+                <input id="currentPassword" type="password" autocomplete="current-password" required />
+                <label for="newPasswordChange">New password (10+ characters)</label>
+                <input id="newPasswordChange" type="password" minlength="10" autocomplete="new-password" required />
+                <button type="submit">Update password</button>
+              </form>
+            </details>
+            <button type="button" id="logoutButton" class="secondary-btn">Sign out</button>
+          </div>
+        </header>
+
+        <div class="status-bar">
+          <span class="dot"></span>
+          <strong id="sectionLabel">Dashboard</strong>
+        </div>
+        <p id="appNotice" class="form-message" role="status" aria-live="polite"></p>
+
+        <section id="dashboardView" class="page-view active">
+          <div class="stats-grid" id="statsGrid"></div>
+
+          <div class="content-grid">
+            <div class="panel span-2">
+              <div class="panel-header">
+                <h3>Collector Work Queue</h3>
+                <button type="button" id="refreshDashboard" class="secondary-btn">Refresh</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Client</th>
+                    <th>Collector</th>
+                    <th>Days Due</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="queueTable"></tbody>
+              </table>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Promises to Pay</h3>
+              </div>
+              <div id="promisesList" class="mini-list"></div>
+            </div>
+          </div>
+
+          <div class="bottom-grid">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Recent Activity</h3>
+              </div>
+              <ul id="activityList" class="timeline"></ul>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Recovery Outlook</h3>
+              </div>
+              <div class="chart-box">
+                <div class="bar-group">
+                  <span style="height: 68%"></span>
+                  <span style="height: 82%"></span>
+                  <span style="height: 58%"></span>
+                  <span style="height: 90%"></span>
+                  <span style="height: 75%"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="accountsView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header">
+              <h3>Add New Collection Account</h3>
+            </div>
+            <form id="accountForm" class="account-form">
+              <div class="field-group">
+                <label>Account Number</label>
+                <output id="accountNumberPreview">Generated automatically on save</output>
+              </div>
+              <div class="field-group">
+                <label>Client</label>
+                <select id="client" name="client" required></select>
+              </div>
+              <div class="field-group">
+                <label>Balance</label>
+                <input type="number" id="balance" name="balance" min="0" required />
+              </div>
+              <div class="field-group">
+                <label>Days Past Due</label>
+                <input type="number" id="daysPastDue" name="daysPastDue" min="0" required />
+              </div>
+              <div class="field-group">
+                <label>Collector</label>
+                <select id="collector" name="collector" required></select>
+              </div>
+              <p id="collectorSetupHint" class="field-hint" role="status"></p>
+              <div class="field-group">
+                <label>Status</label>
+                <select id="status" name="status">
+                  <option value="Active">Active</option>
+                  <option value="Follow-up">Follow-up</option>
+                  <option value="Escalated">Escalated</option>
+                </select>
+              </div>
+              <button type="submit">Add Account</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Account Registry</h3>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Account</th><th>Client</th><th>Balance</th><th>Days due</th><th>Collector</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="accountsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <dialog id="accountDialog" class="workflow-dialog">
+          <form id="accountEditForm" class="dialog-form">
+            <input id="editAccountId" type="hidden" />
+            <h2>Update collection account</h2>
+            <p id="editAccountNumber" class="dialog-context"></p>
+            <div class="field-group">
+              <label for="editAccountStatus">Account status</label>
+              <select id="editAccountStatus" required>
+                <option>Active</option><option>Follow-up</option><option>Escalated</option><option>Paid</option><option>Closed</option>
+              </select>
+            </div>
+            <div class="field-group" id="editAssignmentFields">
+              <label for="editCollector">Assigned collector</label>
+              <select id="editCollector" required></select>
+              <label for="editBalance">Outstanding balance</label>
+              <input id="editBalance" type="number" min="0" step="0.01" />
+              <label for="editDaysPastDue">Days past due</label>
+              <input id="editDaysPastDue" type="number" min="0" />
+            </div>
+            <div class="dialog-actions">
+              <button type="button" class="secondary-btn" id="cancelAccountEdit">Cancel</button>
+              <button type="submit" class="primary-btn">Save updates</button>
+            </div>
+          </form>
+        </dialog>
+
+        <section id="promisesView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header">
+              <h3>Promise to Pay</h3>
+            </div>
+            <form id="promiseForm" class="promise-form">
+              <div class="field-group">
+                <label>Account</label>
+                <select id="promiseAccount"></select>
+              </div>
+              <div class="field-group">
+                <label>Amount</label>
+                <input type="number" id="promiseAmount" min="0" required />
+              </div>
+              <div class="field-group">
+                <label>Due Date</label>
+                <input type="date" id="promiseDate" required />
+              </div>
+              <div class="field-group">
+                <label>Payment Method</label>
+                <select id="promiseMethod"><option>Bank transfer</option><option>Cash</option><option>Card</option><option>Mobile wallet</option><option>Other</option></select>
+              </div>
+              <button type="submit">Save Promise</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Promise Status</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="promiseTable"></tbody>
+            </table>
+          </div>
+
+          <div class="panel form-panel">
+            <div class="panel-header"><h3>Record a payment</h3></div>
+            <form id="paymentForm" class="payment-form">
+              <div class="field-group"><label for="paymentAccount">Account</label><select id="paymentAccount" required></select></div>
+              <div class="field-group"><label for="paymentPromise">Promise (optional)</label><select id="paymentPromise"></select></div>
+              <div class="field-group"><label for="paymentAmount">Amount</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required /></div>
+              <div class="field-group"><label for="paymentMethod">Method</label><select id="paymentMethod"><option>Bank transfer</option><option>Cash</option><option>Card</option><option>Mobile wallet</option><option>Other</option></select></div>
+              <div class="field-group"><label for="paymentReference">Reference</label><input id="paymentReference" maxlength="120" /></div>
+              <button type="submit">Record payment</button>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h3>Payment history</h3></div>
+            <div class="table-scroll"><table><thead><tr><th>Account</th><th>Amount</th><th>Method</th><th>Reference</th><th>Received</th><th>Action</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <section id="activitiesView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header"><h3>Record collection interaction</h3></div>
+            <form id="activityForm" class="activity-form">
+              <div class="field-group"><label for="activityAccount">Account</label><select id="activityAccount" required></select></div>
+              <div class="field-group"><label for="activityTitle">Interaction type</label><select id="activityTitle"><option>Phone call</option><option>SMS notification</option><option>Email</option><option>Field visit</option><option>Customer response</option><option>Other</option></select></div>
+              <div class="field-group activity-detail"><label for="activityDetail">Interaction notes</label><textarea id="activityDetail" rows="3" maxlength="5000" required></textarea></div>
+              <button type="submit">Save activity</button>
+            </form>
+          </div>
+          <div class="panel"><div class="panel-header"><h3>Account activity history</h3></div><ul id="fullActivityList" class="timeline"></ul></div>
+        </section>
+
+        <section id="tasksView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header"><h3>Create follow-up task</h3></div>
+            <form id="taskForm" class="task-form">
+              <div class="field-group"><label for="taskAccount">Account</label><select id="taskAccount" required></select></div>
+              <div class="field-group"><label for="taskTitle">Task</label><input id="taskTitle" maxlength="180" value="Customer follow-up" required /></div>
+              <div class="field-group"><label for="taskDate">Due date</label><input id="taskDate" type="date" required /></div>
+              <div class="field-group" id="taskAssignmentField"><label id="taskCollectorLabel" for="taskCollector">Assign to</label><select id="taskCollector" required></select></div>
+              <p id="taskAccountHint" class="field-hint" role="status"></p>
+              <p id="taskSetupHint" class="field-hint" role="status"></p>
+              <button type="submit">Create task</button>
+            </form>
+          </div>
+          <div class="panel"><div class="panel-header"><h3>Follow-up queue</h3></div><div class="table-scroll"><table><thead><tr><th>Account</th><th>Task</th><th>Assigned to</th><th>Due date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tasksTable"></tbody></table></div></div>
+        </section>
+
+        <section id="reportsView" class="page-view">
+          <div class="stats-grid" id="reportCards"></div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Portfolio Insights</h3>
+            </div>
+            <ul id="reportList" class="timeline"></ul>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Interaction documentation assistant</h3>
+            </div>
+            <form id="summaryForm" class="summary-form">
+              <div class="field-group"><label for="summaryAccount">Account</label><select id="summaryAccount" required></select></div>
+              <div class="field-group"><label for="summaryNotes">Collector notes</label><textarea id="summaryNotes" rows="3" required></textarea></div>
+              <button type="submit">Draft structured summary</button>
+              <div class="field-group"><label for="summaryDraft">Review and confirm summary</label><textarea id="summaryDraft" rows="4" required></textarea></div>
+              <button type="button" id="confirmSummary">Add confirmed summary to activity</button>
+            </form>
+          </div>
+        </section>
+
+        <section id="strategyView" class="page-view">
+          <div class="panel">
+            <div class="panel-header"><h3>Collection strategy simulator</h3></div>
+            <form id="strategyForm" class="strategy-form">
+              <label><input type="radio" name="strategy" value="aging" checked /> Prioritize by days past due</label>
+              <label><input type="radio" name="strategy" value="balance" /> Prioritize by outstanding balance</label>
+              <label><input type="radio" name="strategy" value="promise" /> Prioritize upcoming promises</label>
+              <button type="submit" class="primary-btn">Run simulation</button>
+            </form>
+          </div>
+          <div class="panel"><div class="panel-header"><h3>Projected work queue</h3></div><div id="strategyResults" class="table-scroll"></div></div>
+        </section>
+
+        <section id="clientsView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header">
+              <h3>Add Client Portfolio</h3>
+            </div>
+            <form id="clientForm" class="client-form">
+              <div class="field-group">
+                <label>Client Name</label>
+                <input type="text" id="clientName" required />
+              </div>
+              <div class="field-group">
+                <label>Industry</label>
+                <input type="text" id="clientIndustry" required />
+              </div>
+              <button type="submit">Add Client</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Client Portfolio List</h3>
+            </div>
+            <div id="clientList" class="list-stack"></div>
+          </div>
+        </section>
+
+        <section id="usersView" class="page-view">
+          <div class="panel form-panel">
+            <div class="panel-header">
+              <h3>Create User</h3>
+            </div>
+            <form id="userForm" class="user-form">
+              <div class="field-group">
+                <label for="newUsername">Username</label>
+                <input id="newUsername" autocomplete="off" required />
+              </div>
+              <div class="field-group">
+                <label for="newFullName">Full name</label>
+                <input id="newFullName" required />
+              </div>
+              <div class="field-group">
+                <label for="newRole">Role</label>
+                <select id="newRole" required>
+                  <option value="supervisor">Collection Supervisor</option>
+                  <option value="collector">Collector</option>
+                  <option value="client">Client</option>
+                  <option value="management">Management</option>
+                  <option value="admin">System Administrator</option>
+                </select>
+              </div>
+              <div class="field-group" id="userPortfolioField" hidden>
+                <label for="newClientName">Client portfolio</label>
+                <select id="newClientName"></select>
+              </div>
+              <div class="field-group">
+                <label for="newPassword">Temporary password (10+ characters)</label>
+                <input id="newPassword" type="password" minlength="10" autocomplete="new-password" required />
+              </div>
+              <button type="submit">Create user</button>
+            </form>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Users and roles</h3>
+              <button type="button" id="refreshUsers" class="secondary-btn">Refresh</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>User</th><th>Role</th><th>Portfolio</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="auditView" class="page-view">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Audit trail</h3>
+              <button type="button" id="refreshAudit" class="secondary-btn">Refresh</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Details</th></tr></thead>
+                <tbody id="auditTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
